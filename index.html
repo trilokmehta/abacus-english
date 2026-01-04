@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LexiPro | Advanced English Learning Systems</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .sidebar-item-active {
+            background-color: #4f46e5;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .module-locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col fixed h-full z-20">
+        <div class="p-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                    <i class="fas fa-graduation-cap text-lg"></i>
+                </div>
+                <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Lexi<span class="text-indigo-600">Pro</span></h1>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-6 space-y-8 overflow-y-auto">
+            <!-- Learning Modules -->
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-4 mb-4">Core Modules</p>
+                <div class="space-y-1">
+                    <button onclick="switchModule('adverbs')" id="mod-adverbs" class="sidebar-item-active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 transition-all font-semibold text-sm">
+                        <i class="fas fa-bolt w-5"></i> Adverbs
+                    </button>
+                    <button class="module-locked w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 transition-all font-semibold text-sm">
+                        <i class="fas fa-cube w-5"></i> Nouns <span class="ml-auto text-[10px] bg-slate-100 px-2 py-0.5 rounded">Soon</span>
+                    </button>
+                    <button class="module-locked w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 transition-all font-semibold text-sm">
+                        <i class="fas fa-tag w-5"></i> Pronouns <span class="ml-auto text-[10px] bg-slate-100 px-2 py-0.5 rounded">Soon</span>
+                    </button>
+                    <button class="module-locked w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 transition-all font-semibold text-sm">
+                        <i class="fas fa-clock w-5"></i> Tenses <span class="ml-auto text-[10px] bg-slate-100 px-2 py-0.5 rounded">Soon</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Practice Labs -->
+            <div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-4 mb-4">Specialized Labs</p>
+                <div class="space-y-1">
+                    <button onclick="switchTab('accent')" id="nav-accent" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-semibold text-sm">
+                        <i class="fas fa-globe-americas w-5"></i> Accent Lab
+                    </button>
+                    <button onclick="switchTab('listening')" id="nav-listening" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 hover:bg-slate-50 transition-all font-semibold text-sm">
+                        <i class="fas fa-headphones w-5"></i> Listening Drills
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="p-6 border-t border-slate-100">
+            <div class="bg-gradient-to-br from-indigo-50 to-blue-50 p-5 rounded-2xl border border-indigo-100">
+                <p class="text-xs font-bold text-indigo-600 uppercase mb-2">My Achievement</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+                        🔥
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-800">7 Day Streak</p>
+                        <p class="text-[10px] text-slate-500">Keep it up, Felix!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 lg:ml-72 p-6 lg:p-12">
+        
+        <!-- Top Nav -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+            <div>
+                <h2 class="text-3xl font-black text-slate-800 tracking-tight" id="viewTitle">Adverb Mastery</h2>
+                <p class="text-slate-500 font-medium">Topic: <span class="text-indigo-600" id="topicSubtitle">Vocabulary & Meanings</span></p>
+            </div>
+            
+            <div class="flex items-center gap-4 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+                <div class="px-4">
+                    <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest">Student Level</label>
+                    <select id="levelFilter" onchange="changeLevel()" class="bg-transparent border-0 text-slate-800 text-sm font-bold focus:ring-0 outline-none cursor-pointer">
+                        <option value="basic">Beginner (5-10)</option>
+                        <option value="intermediate">Intermediate (10-15)</option>
+                        <option value="advanced">Advanced (15+)</option>
+                    </select>
+                </div>
+                <div class="h-10 w-[1px] bg-slate-100"></div>
+                <div class="flex items-center gap-3 px-2">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-10 h-10 rounded-xl bg-indigo-50" alt="Avatar">
+                </div>
+            </div>
+        </header>
+
+        <!-- Sub-Navigation for Module -->
+        <div id="moduleTabs" class="flex gap-2 mb-8 bg-slate-100 p-1.5 rounded-2xl w-fit">
+            <button onclick="switchView('vocab')" id="btn-vocab" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-indigo-600 shadow-sm">Dictionary</button>
+            <button onclick="switchView('practice')" id="btn-practice" class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-500 hover:text-slate-700">Practice Quiz</button>
+        </div>
+
+        <!-- Dynamic Content Wrapper -->
+        <div id="contentArea">
+            <!-- Content injected via JS -->
+        </div>
+
+    </main>
+
+    <!-- Modal System -->
+    <div id="modalOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-lg rounded-[2.5rem] p-10 shadow-2xl transform transition-all scale-95" id="modalContent">
+            <div id="modalIcon" class="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 text-3xl"></div>
+            <h3 id="modalTitle" class="text-center text-3xl font-black text-slate-800 mb-2"></h3>
+            <p id="modalBody" class="text-center text-slate-500 mb-8 leading-relaxed"></p>
+            <div id="modalExplain" class="bg-indigo-50 p-6 rounded-3xl text-indigo-700 text-sm italic mb-8 border border-indigo-100"></div>
+            <button onclick="closeModal()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">Got it, Thanks!</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Database / Curriculum ---
+        const db = {
+            adverbs: {
+                basic: [
+                    { word: "Slowly", meaning: "At a low speed; not quickly.", example: "The snail moves slowly.", quiz: "The turtle walks _______ across the sand.", options: ["slowly", "red", "fastly"], correct: "slowly", explanation: "We use 'slowly' to describe the speed of the action. Note: 'fastly' is not a real word!" },
+                    { word: "Happily", meaning: "In a happy or cheerful way.", example: "The birds are singing happily.", quiz: "The children played _______ in the park.", options: ["happily", "sad", "quick"], correct: "happily", explanation: "'Happily' describes the mood or manner of the children playing." }
+                ],
+                intermediate: [
+                    { word: "Frequently", meaning: "Often; many times.", example: "He frequently goes to the gym.", quiz: "I _______ check my phone for messages.", options: ["frequently", "frequent", "more frequent"], correct: "frequently", explanation: "As an adverb of frequency, it tells us 'how often'." }
+                ]
+            }
+        };
+
+        let activeModule = 'adverbs';
+        let activeView = 'vocab'; // vocab or practice
+        let activeLevel = 'basic';
+        let currentItemIdx = 0;
+        let voices = [];
+
+        // --- Core Controllers ---
+
+        function switchModule(mod) {
+            activeModule = mod;
+            currentItemIdx = 0;
+            render();
+        }
+
+        function switchView(view) {
+            activeView = view;
+            document.getElementById('btn-vocab').className = view === 'vocab' ? "px-6 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-indigo-600 shadow-sm" : "px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-500";
+            document.getElementById('btn-practice').className = view === 'practice' ? "px-6 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-indigo-600 shadow-sm" : "px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-500";
+            render();
+        }
+
+        function changeLevel() {
+            activeLevel = document.getElementById('levelFilter').value;
+            currentItemIdx = 0;
+            render();
+        }
+
+        function switchTab(tab) {
+            if (tab === 'accent') {
+                renderAccentLab();
+            } else {
+                render();
+            }
+        }
+
+        // --- Render Engines ---
+
+        function render() {
+            const area = document.getElementById('contentArea');
+            const data = db[activeModule][activeLevel][currentItemIdx];
+            
+            if (activeView === 'vocab') {
+                document.getElementById('topicSubtitle').innerText = "Vocabulary & Meanings";
+                area.innerHTML = `
+                    <div class="max-w-4xl mx-auto">
+                        <div class="bg-white p-12 rounded-[3rem] shadow-sm border border-slate-100 text-center relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-8">
+                                <span class="bg-indigo-50 text-indigo-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">Entry #${currentItemIdx + 1}</span>
+                            </div>
+                            <h1 class="text-7xl font-black text-slate-900 mb-4 tracking-tighter">${data.word}</h1>
+                            <p class="text-xl text-slate-500 mb-10 max-w-md mx-auto font-medium">${data.meaning}</p>
+                            
+                            <div class="bg-slate-50 p-8 rounded-[2rem] border-2 border-dashed border-slate-200 mb-10 group cursor-pointer hover:border-indigo-300 transition-all" onclick="speakText('${data.example}', 'en-US')">
+                                <p class="text-2xl text-slate-700 italic font-serif">"${data.example}"</p>
+                                <div class="mt-4 flex items-center justify-center gap-2 text-indigo-600 font-bold text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all">
+                                    <i class="fas fa-volume-up"></i> Click to Hear Pronunciation
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <button onclick="startMicCheck('${data.word}')" id="micBtn" class="flex-1 bg-indigo-600 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all">
+                                    <i class="fas fa-microphone"></i> Practice Speaking
+                                </button>
+                                <button onclick="nextItem()" class="px-8 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all">
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (activeView === 'practice') {
+                document.getElementById('topicSubtitle').innerText = "Interactive Practice";
+                area.innerHTML = `
+                    <div class="max-w-3xl mx-auto space-y-6">
+                        <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
+                            <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-4">Challenge</p>
+                            <h2 class="text-2xl font-bold text-slate-800 mb-8 leading-relaxed">${data.quiz}</h2>
+                            <div class="grid gap-3">
+                                ${data.options.map(opt => `
+                                    <button onclick="checkAnswer('${opt}', '${data.correct}', '${data.explanation}')" class="w-full text-left p-5 rounded-2xl border-2 border-slate-50 hover:border-indigo-500 hover:bg-indigo-50 transition-all font-bold text-slate-600">
+                                        ${opt}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderAccentLab() {
+            document.getElementById('viewTitle').innerText = "Accent Lab";
+            document.getElementById('topicSubtitle').innerText = "US, UK & Canada Training";
+            document.getElementById('moduleTabs').innerHTML = ''; // Hide module tabs in lab
+
+            const area = document.getElementById('contentArea');
+            area.innerHTML = `
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-black mb-6">Accent Settings</h3>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Region Select</label>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <button onclick="setAccent('en-US')" id="acc-us" class="p-4 rounded-2xl border-2 border-indigo-500 bg-indigo-50 text-indigo-700 font-bold flex flex-col items-center gap-2">
+                                        <span class="text-2xl">🇺🇸</span> US
+                                    </button>
+                                    <button onclick="setAccent('en-GB')" id="acc-uk" class="p-4 rounded-2xl border-2 border-slate-100 hover:border-indigo-200 font-bold flex flex-col items-center gap-2">
+                                        <span class="text-2xl">🇬🇧</span> UK
+                                    </button>
+                                    <button onclick="setAccent('en-CA')" id="acc-ca" class="p-4 rounded-2xl border-2 border-slate-100 hover:border-indigo-200 font-bold flex flex-col items-center gap-2">
+                                        <span class="text-2xl">🇨🇦</span> Canada
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Available Voices</label>
+                                <select id="voiceSelect" class="w-full p-4 rounded-2xl bg-slate-50 border-0 font-bold text-slate-700 outline-none"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-10 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
+                        <div class="relative z-10 h-full flex flex-col">
+                            <h3 class="text-xl font-bold mb-4">Text-to-Audio Generator</h3>
+                            <textarea id="labText" class="flex-1 bg-transparent border-0 text-2xl font-medium text-slate-300 placeholder-slate-600 resize-none outline-none mb-6" placeholder="Type a sentence to hear it in your chosen accent..."></textarea>
+                            
+                            <button onclick="generateAudio()" class="w-full bg-white text-slate-900 py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-indigo-400 hover:text-white transition-all">
+                                <i class="fas fa-play-circle text-xl"></i> Listen Now
+                            </button>
+                        </div>
+                        <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl"></div>
+                    </div>
+                </div>
+            `;
+            populateVoices();
+        }
+
+        // --- Speech & Audio Logic ---
+
+        function populateVoices() {
+            voices = window.speechSynthesis.getVoices();
+            const select = document.getElementById('voiceSelect');
+            if(!select) return;
+            select.innerHTML = '';
+            
+            voices.forEach(voice => {
+                const option = document.createElement('option');
+                option.textContent = `${voice.name} (${voice.lang})`;
+                option.value = voice.name;
+                select.appendChild(option);
+            });
+        }
+
+        function setAccent(lang) {
+            // UI Toggle logic
+            ['acc-us', 'acc-uk', 'acc-ca'].forEach(id => {
+                document.getElementById(id).className = "p-4 rounded-2xl border-2 border-slate-100 hover:border-indigo-200 font-bold flex flex-col items-center gap-2";
+            });
+            const activeId = lang === 'en-US' ? 'acc-us' : lang === 'en-GB' ? 'acc-uk' : 'acc-ca';
+            document.getElementById(activeId).className = "p-4 rounded-2xl border-2 border-indigo-500 bg-indigo-50 text-indigo-700 font-bold flex flex-col items-center gap-2";
+            
+            // Filter voice list based on lang
+            const select = document.getElementById('voiceSelect');
+            const filtered = voices.filter(v => v.lang.startsWith(lang.split('-')[0]));
+            if(filtered.length > 0) {
+                select.value = filtered[0].name;
+            }
+        }
+
+        function generateAudio() {
+            const text = document.getElementById('labText').value || "Please enter some text to listen.";
+            const voiceName = document.getElementById('voiceSelect').value;
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.voice = voices.find(v => v.name === voiceName);
+            window.speechSynthesis.speak(utter);
+        }
+
+        function speakText(text, lang = 'en-US') {
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = lang;
+            window.speechSynthesis.speak(utter);
+        }
+
+        function startMicCheck(target) {
+            if (!('webkitSpeechRecognition' in window)) return alert("Speech recognition not supported.");
+            
+            const btn = document.getElementById('micBtn');
+            const recognition = new webkitSpeechRecognition();
+            recognition.lang = 'en-US';
+            
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing...';
+            btn.classList.replace('bg-indigo-600', 'bg-red-500');
+
+            recognition.onresult = (e) => {
+                const result = e.results[0][0].transcript.toLowerCase();
+                btn.innerHTML = '<i class="fas fa-microphone"></i> Practice Speaking';
+                btn.classList.replace('bg-red-500', 'bg-indigo-600');
+                
+                if(result.includes(target.toLowerCase())) {
+                    showModal("Perfect Pronunciation!", "We heard you loud and clear. Your accent is very close to a native speaker.", `Heard: "${result}"`, "bg-green-100 text-green-600", "fa-check-circle");
+                } else {
+                    showModal("Try Again", `We heard "${result}". Focus on the '${target}' sound and try again.`, "Tip: Speak clearly into the microphone.", "bg-amber-100 text-amber-600", "fa-microphone-alt");
+                }
+            };
+            recognition.start();
+        }
+
+        // --- UI Utilities ---
+
+        function checkAnswer(selected, correct, explain) {
+            if(selected === correct) {
+                showModal("Great Work!", "That is exactly correct. You are mastering your adverbs!", explain, "bg-green-100 text-green-600", "fa-graduation-cap");
+            } else {
+                showModal("Almost There!", "That wasn't quite it, but learning is about making mistakes.", explain, "bg-red-100 text-red-600", "fa-lightbulb");
+            }
+        }
+
+        function showModal(title, body, explain, colorClass, icon) {
+            const modal = document.getElementById('modalOverlay');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalBody').innerText = body;
+            document.getElementById('modalExplain').innerText = explain;
+            document.getElementById('modalIcon').className = `w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 text-3xl ${colorClass}`;
+            document.getElementById('modalIcon').innerHTML = `<i class="fas ${icon}"></i>`;
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => document.getElementById('modalContent').classList.remove('scale-95'), 10);
+        }
+
+        function closeModal() {
+            document.getElementById('modalContent').classList.add('scale-95');
+            setTimeout(() => document.getElementById('modalOverlay').classList.add('hidden'), 200);
+        }
+
+        function nextItem() {
+            const list = db[activeModule][activeLevel];
+            currentItemIdx = (currentItemIdx + 1) % list.length;
+            render();
+        }
+
+        window.onload = () => {
+            render();
+            // Load voices
+            window.speechSynthesis.onvoiceschanged = populateVoices;
+        };
+    </script>
+</body>
+</html>
