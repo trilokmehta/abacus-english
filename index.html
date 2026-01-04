@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LexiPro | English Grammar Learning Portal</title>
+    <title>LexiPro | Professional English Grammar Module</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -11,44 +11,27 @@
         
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #ffffff;
+            background-color: #f8fafc;
             color: #0f172a;
-            overflow-x: hidden;
         }
 
-        /* Journey Progress Circle Styles */
-        .node-circle {
-            position: relative;
-            width: 80px;
-            height: 80px;
+        .content-card {
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid #e2e8f0;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
-        @media (min-width: 768px) {
-            .node-circle {
-                width: 96px;
-                height: 96px;
-            }
-        }
-
-        .node-icon-bg {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .btn-action {
-            transition: all 0.2s ease;
-        }
-
-        .btn-action:active {
-            transform: scale(0.96);
-        }
-
-        .progress-bar-fill {
-            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .nav-tab-active {
+            color: #4f46e5;
+            border-bottom: 2px solid #4f46e5;
         }
 
         .option-card {
             border: 2px solid #f1f5f9;
             transition: all 0.2s ease;
+            cursor: pointer;
         }
 
         .option-card:hover {
@@ -62,537 +45,310 @@
             color: #4f46e5;
         }
 
-        @keyframes slideInUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
         }
 
-        .animate-slide-up {
-            animation: slideInUp 0.4s ease-out forwards;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        /* Hide scrollbars but allow scrolling */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="flex min-h-screen bg-slate-50 lg:bg-white">
+<body class="flex min-h-screen">
 
-    <!-- Sidebar Navigation (Desktop Only) -->
-    <aside id="sidebar" class="w-72 bg-white border-r border-slate-100 hidden lg:flex flex-col fixed h-full z-30">
+    <!-- Sidebar -->
+    <aside class="w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col fixed h-full z-30">
         <div class="p-8">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-100">
-                    <i class="fas fa-feather-alt text-xl"></i>
+                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white">
+                    <i class="fas fa-feather-alt"></i>
                 </div>
-                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">Lexi<span class="text-indigo-600">Pro</span></h1>
+                <h1 class="text-xl font-extrabold tracking-tight">Lexi<span class="text-indigo-600">Pro</span></h1>
             </div>
         </div>
-
         <nav class="flex-1 px-4 space-y-1">
-            <button onclick="resetToHome()" id="nav-home-desktop" class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl bg-indigo-50 text-indigo-700 font-bold transition-all">
-                <i class="fas fa-home text-lg"></i> Learning Path
-            </button>
-            <button onclick="switchTab('accent')" id="nav-accent-desktop" class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-slate-500 hover:bg-slate-50 font-bold transition-all">
-                <i class="fas fa-microphone-alt text-lg"></i> Accent Lab
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Curriculum</p>
+            <button onclick="switchModule('adverbs')" class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl bg-indigo-50 text-indigo-700 font-bold transition-all">
+                <i class="fas fa-bolt"></i> Adverbs Module
             </button>
             <button class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-slate-400 font-bold cursor-not-allowed">
-                <i class="fas fa-book-reader text-lg"></i> Course Library
+                <i class="fas fa-cube"></i> Nouns
             </button>
             <button class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-slate-400 font-bold cursor-not-allowed">
-                <i class="fas fa-graduation-cap text-lg"></i> Certifications
+                <i class="fas fa-tag"></i> Pronouns
             </button>
         </nav>
-
         <div class="p-6 mt-auto">
-            <div class="bg-slate-50 border border-slate-200 p-5 rounded-[2rem] text-slate-800">
-                <div class="relative z-10">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">STUDENT ACCOUNT</p>
-                    <p class="text-sm font-bold mb-3">Professional Track</p>
-                    <button class="w-full bg-white border border-slate-200 text-slate-600 py-3 rounded-xl text-xs font-black transition-all hover:bg-slate-100">VIEW PROFILE</button>
-                </div>
-            </div>
+            <button onclick="switchTab('accent')" class="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-slate-500 hover:bg-slate-50 font-bold transition-all">
+                <i class="fas fa-microphone-alt"></i> Accent Lab
+            </button>
         </div>
     </aside>
 
-    <!-- Mobile Bottom Navigation -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-3 flex justify-around items-center z-50">
-        <button onclick="resetToHome()" id="nav-home-mobile" class="flex flex-col items-center gap-1 text-indigo-600">
-            <i class="fas fa-home text-xl"></i>
-            <span class="text-[10px] font-bold uppercase tracking-wider">Home</span>
-        </button>
-        <button onclick="switchTab('accent')" id="nav-accent-mobile" class="flex flex-col items-center gap-1 text-slate-400">
-            <i class="fas fa-microphone-alt text-xl"></i>
-            <span class="text-[10px] font-bold uppercase tracking-wider">Accent</span>
-        </button>
-        <button class="flex flex-col items-center gap-1 text-slate-300">
-            <i class="fas fa-book-reader text-xl"></i>
-            <span class="text-[10px] font-bold uppercase tracking-wider">Library</span>
-        </button>
-        <button class="flex flex-col items-center gap-1 text-slate-300">
-            <i class="fas fa-user text-xl"></i>
-            <span class="text-[10px] font-bold uppercase tracking-wider">Account</span>
-        </button>
-    </nav>
-
-    <!-- Main Content Area -->
-    <main class="flex-1 lg:ml-72 relative pb-24 lg:pb-0">
-        
-        <!-- Header Stats -->
-        <header class="sticky top-0 bg-white/95 backdrop-blur-md border-b border-slate-100 z-40">
-            <div class="max-w-5xl mx-auto px-4 md:px-8 h-16 md:h-20 flex items-center justify-between">
-                <!-- Progress for Lessons -->
-                <div id="lessonHeader" class="hidden flex-1 flex items-center gap-4 md:gap-6">
-                    <button onclick="confirmExit()" class="text-slate-400 hover:text-slate-900 transition-colors"><i class="fas fa-times text-xl"></i></button>
-                    <div class="flex-1 bg-slate-100 h-2.5 md:h-4 rounded-full overflow-hidden">
-                        <div id="lessonBar" class="progress-bar-fill bg-indigo-600 h-full" style="width: 0%"></div>
+    <!-- Main Content -->
+    <main class="flex-1 lg:ml-72 pb-20">
+        <!-- Module Header -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-20">
+            <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Adverbs of Manner & Frequency</h2>
+                    <p class="text-xs text-slate-500 font-medium">Standard English Level B1</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar">
                     </div>
                 </div>
-
-                <!-- Main Nav User Info -->
-                <div id="mainHeader" class="flex-1 flex items-center">
-                    <div class="flex items-center gap-4 ml-auto">
-                        <span class="text-xs font-bold text-slate-400 hidden sm:block uppercase tracking-widest">Enrolled in: Adverbs Unit</span>
-                        <div class="h-8 w-[1px] bg-slate-100 hidden sm:block"></div>
-                        <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden">
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar">
-                        </div>
-                    </div>
-                </div>
+            </div>
+            <!-- Sub Tabs -->
+            <div class="max-w-5xl mx-auto px-6 flex gap-8">
+                <button id="tab-theory" onclick="renderView('theory')" class="py-4 text-sm font-bold nav-tab-active">1. Theory</button>
+                <button id="tab-examples" onclick="renderView('examples')" class="py-4 text-sm font-bold text-slate-500">2. Examples</button>
+                <button id="tab-quiz" onclick="renderView('quiz')" class="py-4 text-sm font-bold text-slate-500">3. Assessment</button>
             </div>
         </header>
 
-        <!-- Dynamic Content -->
-        <div class="max-w-4xl mx-auto p-5 md:p-8 lg:py-12 min-h-[calc(100vh-80px)]">
-            
-            <!-- Home: Journey Path View -->
-            <section id="viewHome" class="space-y-10 md:space-y-16 animate-slide-up">
-                <!-- Unit Header -->
-                <div class="bg-indigo-900 rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
-                    <div class="space-y-1 relative z-10">
-                        <span class="text-[10px] font-black text-indigo-300 uppercase tracking-[0.2em]">Grammar Module</span>
-                        <h2 class="text-3xl md:text-4xl font-black">Unit 01</h2>
-                        <p class="text-indigo-100 text-base md:text-lg font-medium">Core Adverbs of Manner & Degree</p>
-                    </div>
-                    <button class="w-full md:w-auto bg-white/10 border border-white/20 hover:bg-white/20 px-6 md:px-8 py-3.5 md:py-4 rounded-xl md:rounded-2xl flex items-center justify-center gap-3 font-bold transition-all relative z-10">
-                        <i class="fas fa-file-alt"></i> View Materials
-                    </button>
-                </div>
-
-                <!-- Vertical Path -->
-                <div class="relative flex flex-col items-center gap-10 md:gap-12 py-4">
-                    <!-- Lesson 1 -->
-                    <div onclick="startLesson('basic')" class="journey-node z-10 cursor-pointer flex flex-col items-center group">
-                        <div class="node-circle">
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <div class="node-icon-bg w-14 h-14 md:w-20 md:h-20 bg-indigo-600 rounded-3xl flex items-center justify-center text-white text-xl md:text-2xl shadow-lg shadow-indigo-100">
-                                    <i class="fas fa-book"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="mt-4 font-extrabold text-slate-800 text-sm md:text-base tracking-tight">Introduction</p>
-                    </div>
-
-                    <!-- Lesson 2 -->
-                    <div class="journey-node z-10 cursor-pointer flex flex-col items-center group opacity-80 hover:opacity-100 transition-all">
-                         <div class="node-circle">
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <div class="node-icon-bg w-14 h-14 md:w-20 md:h-20 bg-white border border-slate-200 rounded-3xl flex items-center justify-center text-slate-400 text-xl md:text-2xl group-hover:border-indigo-200">
-                                    <i class="fas fa-headphones"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="mt-4 font-extrabold text-slate-500 text-sm md:text-base tracking-tight">Listening Drills</p>
-                    </div>
-
-                    <div class="w-full flex items-center gap-4 md:gap-6 py-4 md:py-6">
-                        <div class="h-px bg-slate-100 flex-1"></div>
-                        <span class="text-[9px] md:text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">Advanced Topics</span>
-                        <div class="h-px bg-slate-100 flex-1"></div>
-                    </div>
-
-                    <!-- Locked -->
-                    <div class="journey-node z-10 opacity-40 flex flex-col items-center grayscale">
-                        <div class="node-circle">
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <div class="node-icon-bg w-14 h-14 md:w-20 md:h-20 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-center text-slate-300 text-xl md:text-2xl">
-                                    <i class="fas fa-lock"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="mt-4 font-extrabold text-slate-400 text-sm md:text-base tracking-tight">Final Assessment</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Lesson View -->
-            <section id="viewLesson" class="hidden h-full flex flex-col max-w-xl mx-auto py-2">
-                <div id="lessonContent" class="flex-1 space-y-8 md:space-y-10">
-                    <!-- Dynamic Lesson Components -->
-                </div>
-            </section>
-
-            <!-- Accent Lab -->
-            <section id="viewAccent" class="hidden space-y-8 animate-slide-up">
-                <div class="flex items-center gap-4 md:gap-6">
-                    <button onclick="resetToHome()" class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center hover:bg-slate-100 rounded-xl md:rounded-2xl transition-all text-slate-400 hover:text-slate-900"><i class="fas fa-arrow-left text-lg"></i></button>
-                    <h2 class="text-2xl md:text-3xl font-black tracking-tight">Accent Research Lab</h2>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-                    <div class="bg-white p-6 md:p-10 rounded-3xl border border-slate-100 shadow-sm space-y-8 md:space-y-10">
-                        <div>
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 md:mb-6">Dialect Selection</p>
-                            <div class="grid grid-cols-3 gap-2 md:gap-4">
-                                <button onclick="setAccent('en-US')" id="acc-us" class="p-3 md:p-5 rounded-xl md:rounded-2xl border-2 border-slate-100 font-bold flex flex-col items-center gap-1.5 md:gap-3 transition-all accent-btn-active">
-                                    <span class="text-xl md:text-3xl">🇺🇸</span> <span class="text-[8px] md:text-xs uppercase tracking-wider">US</span>
-                                </button>
-                                <button onclick="setAccent('en-GB')" id="acc-uk" class="p-3 md:p-5 rounded-xl md:rounded-2xl border-2 border-slate-100 font-bold flex flex-col items-center gap-1.5 md:gap-3 transition-all">
-                                    <span class="text-xl md:text-3xl">🇬🇧</span> <span class="text-[8px] md:text-xs uppercase tracking-wider">UK</span>
-                                </button>
-                                <button onclick="setAccent('en-AU')" id="acc-au" class="p-3 md:p-5 rounded-xl md:rounded-2xl border-2 border-slate-100 font-bold flex flex-col items-center gap-1.5 md:gap-3 transition-all">
-                                    <span class="text-xl md:text-3xl">🇦🇺</span> <span class="text-[8px] md:text-xs uppercase tracking-wider">AU</span>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-4">
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Text Engine</p>
-                            <textarea id="labText" class="w-full bg-slate-50 p-4 md:p-6 rounded-2xl md:rounded-3xl font-semibold text-slate-700 outline-none border-2 border-transparent focus:border-indigo-100 focus:bg-white h-24 md:h-32 transition-all" placeholder="Enter text for pronunciation..."></textarea>
-                            
-                            <div class="flex flex-col sm:flex-row gap-3">
-                                <select id="voiceTypeSelect" class="w-full sm:flex-1 bg-slate-100 px-4 py-3 md:py-4 rounded-xl md:rounded-2xl font-bold text-slate-700 outline-none appearance-none cursor-pointer hover:bg-slate-200 transition-all">
-                                    <option value="auto">Auto-detect Voice</option>
-                                </select>
-                                <button onclick="generateAudio()" class="w-full sm:w-auto px-8 py-3 md:py-4 bg-indigo-600 text-white rounded-xl md:rounded-2xl font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">Play</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-800 rounded-[2rem] md:rounded-[3rem] p-8 md:p-12 text-white flex flex-col justify-center items-center text-center shadow-xl relative overflow-hidden group">
-                        <div class="w-16 h-16 md:w-24 md:h-24 bg-white/10 rounded-2xl md:rounded-[2rem] flex items-center justify-center text-2xl md:text-4xl mb-6 md:mb-8 border border-white/20 relative z-10 backdrop-blur-sm">
-                            <i class="fas fa-microphone"></i>
-                        </div>
-                        <h3 class="text-2xl md:text-3xl font-black mb-3 md:mb-4 relative z-10">Phonetic Review</h3>
-                        <p class="text-slate-300 text-sm md:text-lg mb-8 md:mb-10 font-medium relative z-10">Compare your pronunciation with a native model.</p>
-                        <button onclick="startMicCheck('accurately')" class="w-full sm:w-auto bg-white text-slate-900 px-10 md:px-12 py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl relative z-10 btn-action">Record Audio</button>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- Lesson Footer -->
-        <div id="footerAction" class="fixed bottom-0 left-0 lg:left-72 right-0 bg-white border-t border-slate-100 p-5 md:p-8 z-[60] transform translate-y-full transition-transform duration-500 ease-in-out shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-            <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-5 md:gap-6">
-                <div id="feedbackText" class="flex items-center gap-4 md:gap-5 opacity-0 transition-opacity duration-300 w-full sm:w-auto">
-                    <div id="feedbackIcon" class="w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-xl md:text-2xl"></div>
-                    <div>
-                        <p id="feedbackTitle" class="font-extrabold text-xl md:text-2xl tracking-tight"></p>
-                        <p id="feedbackSub" class="text-xs md:text-sm font-bold opacity-70"></p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4 w-full sm:w-auto">
-                    <button id="btnCheck" onclick="checkSelection()" class="w-full sm:w-auto bg-indigo-600 text-white px-8 md:px-12 py-4 md:py-5 rounded-2xl font-black uppercase tracking-[0.1em] disabled:opacity-20 disabled:bg-slate-300 transition-all btn-action shadow-xl shadow-indigo-100">Check</button>
-                    <button id="btnContinue" onclick="nextStep()" class="hidden w-full sm:w-auto bg-indigo-600 text-white px-8 md:px-12 py-4 md:py-5 rounded-2xl font-black uppercase tracking-[0.1em] hover:bg-indigo-700 transition-all btn-action shadow-xl shadow-indigo-100">Continue</button>
-                </div>
-            </div>
+        <div id="main-content" class="max-w-4xl mx-auto p-8 animate-fade-in">
+            <!-- Content injected here -->
         </div>
     </main>
 
     <script>
-        // --- Core Application State ---
-        let currentLessonData = [];
-        let lessonIndex = 0;
-        let selectedOption = null;
-        let activeAccent = 'en-US';
-        let voices = [];
+        // --- Curriculum Data ---
+        const moduleData = {
+            adverbs: {
+                theory: `
+                    <div class="space-y-8">
+                        <section>
+                            <h3 class="text-2xl font-black text-slate-900 mb-4">What is an Adverb?</h3>
+                            <p class="text-lg text-slate-600 leading-relaxed">
+                                An <strong>adverb</strong> is a word that modifies or describes a verb, an adjective, or another adverb. 
+                                It provides more information about <span class="text-indigo-600 font-bold">how</span>, 
+                                <span class="text-indigo-600 font-bold">where</span>, 
+                                <span class="text-indigo-600 font-bold">when</span>, or 
+                                <span class="text-indigo-600 font-bold">to what extent</span> an action is performed.
+                            </p>
+                        </section>
 
-        const db = {
-            basic: [
-                { type: 'mcq', prompt: 'Select the correct adverbial form:', sentence: 'The technician handled the delicate hardware _______ during the repair.', options: ['carefully', 'careful', 'carefulness'], correct: 'carefully', audio: 'The technician handled the delicate hardware carefully during the repair.' },
-                { type: 'speak', prompt: 'Pronounce the target word clearly.', target: 'Accurately', audio: 'Accurately' },
-                { type: 'listen', prompt: 'Select the adverb that defines the degree.', audio: 'The weather was extremely cold this morning.', options: ['extremely', 'morning', 'weather'], correct: 'extremely' }
-            ]
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="content-card">
+                                <h4 class="font-bold text-indigo-600 mb-2 uppercase text-xs tracking-widest">Formation</h4>
+                                <p class="text-sm text-slate-600">Most adverbs are formed by adding <strong>-ly</strong> to an adjective.</p>
+                                <ul class="mt-4 space-y-2 text-sm">
+                                    <li class="flex justify-between border-b pb-1"><span>Quick (Adj)</span> <i class="fas fa-arrow-right text-slate-300"></i> <span class="font-bold">Quickly</span></li>
+                                    <li class="flex justify-between border-b pb-1"><span>Happy (Adj)</span> <i class="fas fa-arrow-right text-slate-300"></i> <span class="font-bold">Happily</span></li>
+                                    <li class="flex justify-between border-b pb-1"><span>Careful (Adj)</span> <i class="fas fa-arrow-right text-slate-300"></i> <span class="font-bold">Carefully</span></li>
+                                </ul>
+                            </div>
+                            <div class="content-card">
+                                <h4 class="font-bold text-indigo-600 mb-2 uppercase text-xs tracking-widest">Placement</h4>
+                                <p class="text-sm text-slate-600">Adverbs of manner usually go after the verb or after the object.</p>
+                                <div class="mt-4 p-3 bg-slate-50 rounded-lg italic text-slate-500 text-sm">
+                                    "She sang <span class="text-slate-900 font-bold">beautifully</span>."
+                                </div>
+                            </div>
+                        </div>
+
+                        <section class="content-card">
+                            <h3 class="text-xl font-bold mb-4">Types of Adverbs</h3>
+                            <div class="space-y-4">
+                                <div class="flex gap-4 p-4 border rounded-xl hover:bg-slate-50">
+                                    <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center shrink-0"><i class="fas fa-running"></i></div>
+                                    <div>
+                                        <p class="font-bold">Adverbs of Manner</p>
+                                        <p class="text-sm text-slate-500">Describes HOW an action happens. (e.g., slowly, loudly)</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 border rounded-xl hover:bg-slate-50">
+                                    <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center shrink-0"><i class="fas fa-clock"></i></div>
+                                    <div>
+                                        <p class="font-bold">Adverbs of Time</p>
+                                        <p class="text-sm text-slate-500">Describes WHEN an action happens. (e.g., yesterday, soon)</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-4 p-4 border rounded-xl hover:bg-slate-50">
+                                    <div class="w-10 h-10 bg-green-100 text-green-600 rounded-lg flex items-center justify-center shrink-0"><i class="fas fa-redo"></i></div>
+                                    <div>
+                                        <p class="font-bold">Adverbs of Frequency</p>
+                                        <p class="text-sm text-slate-500">Describes HOW OFTEN something happens. (e.g., always, rarely)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                `,
+                examples: [
+                    { word: "Loudly", type: "Manner", context: "He spoke loudly in the library.", note: "Used to describe the volume of the voice." },
+                    { word: "Frequently", type: "Frequency", context: "I frequently visit the local park.", note: "Used to describe how often the visit happens." },
+                    { word: "Extremely", type: "Degree", context: "The weather is extremely cold today.", note: "Used to intensify the adjective 'cold'." },
+                    { word: "Immediately", type: "Time", context: "Please finish your work immediately.", note: "Indicates the action must happen right now." }
+                ],
+                quiz: [
+                    { q: "She walked _______ into the quiet room.", options: ["quietly", "quiet", "quietness"], correct: 0, explain: "'Quietly' is the adverb modifying the verb 'walked'." },
+                    { q: "I _______ go swimming in the winter; it's too cold.", options: ["seldom", "always", "everyday"], correct: 0, explain: "'Seldom' means rarely, which fits the context of it being too cold." },
+                    { q: "The birds sang _______ in the morning.", options: ["beautiful", "beautifully", "beauty"], correct: 1, explain: "We need an adverb to describe HOW the birds sang." },
+                    { q: "He handled the antique vase _______.", options: ["careful", "carefully", "carefulness"], correct: 1, explain: "Adverbs of manner describe the process of handling." },
+                    { q: "The project is _______ finished.", options: ["almost", "all", "ready"], correct: 0, explain: "'Almost' is an adverb of degree describing completion." },
+                    { q: "You must speak _______ during the exam.", options: ["softly", "soft", "softness"], correct: 0, explain: "Describes the manner of speaking." },
+                    { q: "He _______ checks his email for updates.", options: ["frequently", "frequent", "more frequent"], correct: 0, explain: "Frequency adverb describing the act of checking." },
+                    { q: "The sun is shining _______ today.", options: ["brightly", "bright", "brightness"], correct: 0, explain: "Describes the intensity of the light." },
+                    { q: "She _______ won the race.", options: ["easily", "easy", "easiest"], correct: 0, explain: "Describes the manner of winning." },
+                    { q: "The train arrived _______ at the station.", options: ["late", "lately", "lateliest"], correct: 0, explain: "'Late' acts as both an adjective and an adverb here." }
+                ]
+            }
         };
 
-        // --- Navigation Logic ---
+        // --- View Controller ---
+        let currentView = 'theory';
+        let currentQuizIdx = 0;
+        let score = 0;
 
-        function startLesson(level) {
-            currentLevel = level;
-            currentLessonData = db[level];
-            lessonIndex = 0;
+        function renderView(view) {
+            currentView = view;
+            const container = document.getElementById('main-content');
             
-            document.getElementById('viewHome').classList.add('hidden');
-            document.getElementById('viewLesson').classList.remove('hidden');
-            document.getElementById('lessonHeader').classList.remove('hidden');
-            document.getElementById('mainHeader').classList.add('hidden');
-            renderLessonStep();
-        }
+            // Update tabs
+            document.querySelectorAll('header button').forEach(btn => btn.classList.remove('nav-tab-active', 'text-indigo-600'));
+            document.querySelectorAll('header button').forEach(btn => btn.classList.add('text-slate-500'));
+            document.getElementById(`tab-${view}`).classList.add('nav-tab-active');
+            document.getElementById(`tab-${view}`).classList.remove('text-slate-500');
 
-        function resetToHome() {
-            document.getElementById('viewHome').classList.remove('hidden');
-            document.getElementById('viewLesson').classList.add('hidden');
-            document.getElementById('viewAccent').classList.add('hidden');
-            document.getElementById('lessonHeader').classList.add('hidden');
-            document.getElementById('mainHeader').classList.remove('hidden');
-            document.getElementById('footerAction').classList.add('translate-y-full');
-            
-            updateNavUI('home');
-        }
-
-        function switchTab(tab) {
-            document.getElementById('viewHome').classList.add('hidden');
-            document.getElementById('viewAccent').classList.remove('hidden');
-            document.getElementById('viewLesson').classList.add('hidden');
-            updateNavUI(tab);
-        }
-
-        function updateNavUI(active) {
-            // Desktop Sidebar
-            ['nav-home-desktop', 'nav-accent-desktop'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.classList.remove('bg-indigo-50', 'text-indigo-700');
-                    el.classList.add('text-slate-500');
-                }
-            });
-            const activeDesktop = document.getElementById(`nav-${active}-desktop`);
-            if (activeDesktop) {
-                activeDesktop.classList.add('bg-indigo-50', 'text-indigo-700');
-                activeDesktop.classList.remove('text-slate-500');
-            }
-
-            // Mobile Bottom Nav
-            ['nav-home-mobile', 'nav-accent-mobile'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.classList.remove('text-indigo-600');
-                    el.classList.add('text-slate-400');
-                }
-            });
-            const activeMobile = document.getElementById(`nav-${active}-mobile`);
-            if (activeMobile) {
-                activeMobile.classList.add('text-indigo-600');
-                activeMobile.classList.remove('text-slate-400');
-            }
-        }
-
-        function renderLessonStep() {
-            const step = currentLessonData[lessonIndex];
-            const content = document.getElementById('lessonContent');
-            const progress = ((lessonIndex) / currentLessonData.length) * 100;
-            document.getElementById('lessonBar').style.width = `${progress}%`;
-
-            document.getElementById('footerAction').classList.remove('translate-y-full');
-            document.getElementById('btnCheck').classList.remove('hidden');
-            document.getElementById('btnCheck').disabled = true;
-            document.getElementById('btnContinue').classList.add('hidden');
-            document.getElementById('feedbackText').classList.add('opacity-0');
-            document.getElementById('footerAction').classList.remove('bg-green-50', 'bg-red-50', 'border-green-100', 'border-red-100');
-
-            selectedOption = null;
-
-            if (step.type === 'mcq' || step.type === 'listen') {
-                content.innerHTML = `
-                    <div class="space-y-6 md:space-y-8 animate-slide-up">
-                        <div class="space-y-1 md:space-y-2">
-                             <p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Question ${lessonIndex + 1}</p>
-                             <h2 class="text-2xl md:text-3xl font-black text-slate-900 leading-tight">${step.prompt}</h2>
-                        </div>
-                        ${step.type === 'mcq' ? `
-                        <div class="bg-white p-6 md:p-8 rounded-2xl md:rounded-[2rem] border border-slate-200 shadow-sm flex items-start sm:items-center gap-4 md:gap-6">
-                            <button onclick="speakText('${step.audio}')" class="w-12 h-12 md:w-16 md:h-16 flex-shrink-0 bg-indigo-50 text-indigo-600 rounded-xl md:rounded-2xl flex items-center justify-center hover:bg-indigo-100 transition-all text-lg md:text-xl">
-                                <i class="fas fa-volume-up"></i>
-                            </button>
-                            <p class="text-base md:text-xl font-bold text-slate-700 leading-relaxed">${step.sentence.replace('_______', '<span class="text-indigo-600 border-b-2 md:border-b-4 border-indigo-100 px-2 md:px-4">_______</span>')}</p>
-                        </div>` : `
-                        <div class="flex justify-center py-6 md:py-10">
-                            <button onclick="speakText('${step.audio}')" class="w-28 h-28 md:w-40 md:h-40 bg-indigo-900 text-white rounded-[2rem] md:rounded-[3rem] flex items-center justify-center text-4xl md:text-5xl shadow-2xl hover:scale-105 active:scale-95 transition-all">
-                                <i class="fas fa-volume-up"></i>
-                            </button>
-                        </div>`}
-                    </div>
-                    <div class="grid gap-3 md:gap-4 animate-slide-up" style="animation-delay: 0.1s">
-                        ${step.options.map(opt => `
-                            <button onclick="selectOption(this, '${opt}')" class="option-card p-4 md:p-6 rounded-xl md:rounded-2xl font-bold text-slate-700 text-left transition-all text-sm md:text-base">
-                                ${opt}
-                            </button>
+            if (view === 'theory') {
+                container.innerHTML = moduleData.adverbs.theory;
+            } else if (view === 'examples') {
+                container.innerHTML = `
+                    <div class="grid gap-6">
+                        ${moduleData.adverbs.examples.map(ex => `
+                            <div class="content-card flex flex-col md:flex-row gap-6 items-start">
+                                <div class="bg-indigo-50 p-4 rounded-2xl shrink-0">
+                                    <button onclick="speakText('${ex.context}')" class="text-indigo-600 hover:scale-110 transition-transform">
+                                        <i class="fas fa-volume-up text-xl"></i>
+                                    </button>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h4 class="text-xl font-bold text-slate-900">${ex.word}</h4>
+                                        <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase tracking-widest">${ex.type}</span>
+                                    </div>
+                                    <p class="text-lg text-slate-700 italic border-l-4 border-indigo-200 pl-4 mb-3">"${ex.context}"</p>
+                                    <p class="text-sm text-slate-500">${ex.note}</p>
+                                </div>
+                            </div>
                         `).join('')}
                     </div>
                 `;
-            } else if (step.type === 'speak') {
-                content.innerHTML = `
-                    <div class="space-y-6 md:space-y-8 animate-slide-up text-center sm:text-left">
-                        <div class="space-y-1 md:space-y-2">
-                            <p class="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Pronunciation Module</p>
-                            <h2 class="text-2xl md:text-3xl font-black text-slate-900">${step.prompt}</h2>
-                        </div>
-                        <div class="flex flex-col items-center gap-6 md:gap-10 py-6 md:py-12">
-                            <button onclick="speakText('${step.audio}')" class="w-20 h-20 md:w-24 md:h-24 bg-slate-100 text-slate-400 rounded-2xl md:rounded-[2rem] flex items-center justify-center text-2xl md:text-3xl border border-slate-200 hover:text-indigo-600 hover:border-indigo-100 transition-all">
-                                <i class="fas fa-volume-up"></i>
-                            </button>
-                            <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter">${step.target}</h1>
-                            <button onclick="startMicCheck('${step.target}')" id="micBtn" class="w-full sm:w-auto bg-indigo-900 text-white px-8 md:px-12 py-4 md:py-6 rounded-2xl md:rounded-3xl font-black uppercase tracking-widest flex items-center justify-center gap-4 shadow-xl transition-all btn-action">
-                                <i class="fas fa-microphone"></i> Tap to speak
-                            </button>
+            } else if (view === 'quiz') {
+                currentQuizIdx = 0;
+                score = 0;
+                renderQuizQuestion();
+            }
+        }
+
+        function renderQuizQuestion() {
+            const container = document.getElementById('main-content');
+            const question = moduleData.adverbs.quiz[currentQuizIdx];
+            
+            container.innerHTML = `
+                <div class="max-w-2xl mx-auto">
+                    <div class="mb-8 flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Question ${currentQuizIdx + 1} of 10</span>
+                        <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Score: ${score}</span>
+                    </div>
+                    <div class="content-card mb-8">
+                        <h3 class="text-xl font-bold text-slate-800 leading-relaxed mb-8">${question.q}</h3>
+                        <div class="space-y-3">
+                            ${question.options.map((opt, i) => `
+                                <button onclick="checkAnswer(${i})" class="option-card w-full p-5 rounded-2xl font-bold text-slate-600 text-left transition-all">
+                                    ${opt}
+                                </button>
+                            `).join('')}
                         </div>
                     </div>
-                `;
-                document.getElementById('btnCheck').classList.add('hidden');
-            }
+                    <div id="quiz-feedback" class="hidden animate-fade-in">
+                        <div id="feedback-box" class="p-6 rounded-2xl mb-6">
+                            <p id="feedback-title" class="font-black text-lg mb-1"></p>
+                            <p id="feedback-msg" class="text-sm"></p>
+                        </div>
+                        <button onclick="nextQuestion()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800">Next Question</button>
+                    </div>
+                </div>
+            `;
         }
 
-        // --- Interaction Logic ---
+        function checkAnswer(selectedIdx) {
+            const question = moduleData.adverbs.quiz[currentQuizIdx];
+            const feedback = document.getElementById('quiz-feedback');
+            const box = document.getElementById('feedback-box');
+            const title = document.getElementById('feedback-title');
+            const msg = document.getElementById('feedback-msg');
 
-        function selectOption(btn, val) {
-            document.querySelectorAll('.option-card').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedOption = val;
-            document.getElementById('btnCheck').disabled = false;
-        }
+            const isCorrect = selectedIdx === question.correct;
+            if(isCorrect) score++;
 
-        function checkSelection() {
-            const step = currentLessonData[lessonIndex];
-            const isCorrect = selectedOption === step.correct;
-            handleFeedback(isCorrect);
-        }
-
-        function handleFeedback(isCorrect) {
-            const footer = document.getElementById('footerAction');
-            const feedback = document.getElementById('feedbackText');
-            const btnCheck = document.getElementById('btnCheck');
-            const btnContinue = document.getElementById('btnContinue');
-
-            feedback.classList.remove('opacity-0');
-            btnCheck.classList.add('hidden');
-            btnContinue.classList.remove('hidden');
-
-            if (isCorrect) {
-                footer.classList.add('bg-green-50', 'border-green-100');
-                document.getElementById('feedbackIcon').className = "w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-xl md:text-3xl bg-green-600 text-white shadow-lg";
-                document.getElementById('feedbackIcon').innerHTML = '<i class="fas fa-check"></i>';
-                document.getElementById('feedbackTitle').innerText = "Correct";
-                document.getElementById('feedbackTitle').className = "font-black text-xl md:text-2xl text-green-900";
-            } else {
-                footer.classList.add('bg-red-50', 'border-red-100');
-                document.getElementById('feedbackIcon').className = "w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center text-xl md:text-3xl bg-red-600 text-white shadow-lg";
-                document.getElementById('feedbackIcon').innerHTML = '<i class="fas fa-info-circle"></i>';
-                document.getElementById('feedbackTitle').innerText = "Incorrect";
-                document.getElementById('feedbackTitle').className = "font-black text-xl md:text-2xl text-red-900";
-                document.getElementById('feedbackSub').innerText = `Expected: ${currentLessonData[lessonIndex].correct}`;
-            }
-        }
-
-        function nextStep() {
-            lessonIndex++;
-            if (lessonIndex < currentLessonData.length) {
-                renderLessonStep();
-            } else {
-                completeLesson();
-            }
-        }
-
-        function completeLesson() {
-            alert(`Section Completed. Returning to Learning Path.`);
-            resetToHome();
-        }
-
-        // --- Voice & Synthesis Logic ---
-
-        function populateVoices() {
-            voices = window.speechSynthesis.getVoices();
-            const voiceSelect = document.getElementById('voiceTypeSelect');
-            if(!voiceSelect) return;
-
-            voiceSelect.innerHTML = '<option value="auto">System Default Voice</option>';
-            const region = activeAccent.split('-')[1] || activeAccent;
-            const filtered = voices.filter(v => v.lang.includes(region));
-
-            filtered.forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v.name;
-                opt.textContent = v.name.replace('Google ', '').replace('Microsoft ', '');
-                voiceSelect.appendChild(opt);
-            });
-        }
-
-        function setAccent(lang) {
-            activeAccent = lang;
-            ['acc-us', 'acc-uk', 'acc-au', 'acc-ca', 'acc-in'].forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.classList.remove('accent-btn-active');
-            });
-            const suffix = lang.includes('-') ? lang.split('-')[1].toLowerCase() : lang.toLowerCase();
-            const activeId = `acc-${suffix}`;
-            const activeEl = document.getElementById(activeId);
-            if(activeEl) activeEl.classList.add('accent-btn-active');
+            feedback.classList.remove('hidden');
+            document.querySelectorAll('.option-card').forEach(btn => btn.disabled = true);
             
-            populateVoices();
+            if(isCorrect) {
+                box.className = "p-6 rounded-2xl mb-6 bg-green-50 border border-green-200 text-green-900";
+                title.innerText = "Correct!";
+            } else {
+                box.className = "p-6 rounded-2xl mb-6 bg-red-50 border border-red-200 text-red-900";
+                title.innerText = "Incorrect";
+            }
+            msg.innerText = question.explain;
+        }
+
+        function nextQuestion() {
+            currentQuizIdx++;
+            if (currentQuizIdx < moduleData.adverbs.quiz.length) {
+                renderQuizQuestion();
+            } else {
+                renderQuizResult();
+            }
+        }
+
+        function renderQuizResult() {
+            const container = document.getElementById('main-content');
+            container.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="w-24 h-24 bg-indigo-600 rounded-3xl flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-xl">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h2 class="text-3xl font-black mb-2">Assessment Complete</h2>
+                    <p class="text-slate-500 mb-8">You scored ${score} out of 10</p>
+                    <div class="flex gap-4 justify-center">
+                        <button onclick="renderView('quiz')" class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold">Retake Quiz</button>
+                        <button onclick="renderView('theory')" class="bg-white border border-slate-200 px-8 py-4 rounded-2xl font-bold text-slate-600">Review Theory</button>
+                    </div>
+                </div>
+            `;
         }
 
         function speakText(text) {
             const utter = new SpeechSynthesisUtterance(text);
-            const voiceType = document.getElementById('voiceTypeSelect')?.value || 'auto';
-
-            if(voiceType !== 'auto') {
-                utter.voice = voices.find(v => v.name === voiceType);
-            } else {
-                const voice = voices.find(v => v.lang.startsWith(activeAccent.split('-')[0]) && v.lang.includes(activeAccent.split('-')[1]));
-                if (voice) utter.voice = voice;
-            }
-
             utter.rate = 0.85;
-            utter.pitch = 1.0;
             window.speechSynthesis.speak(utter);
         }
 
-        function generateAudio() {
-            const val = document.getElementById('labText').value;
-            if(val) speakText(val);
-        }
-
-        function startMicCheck(target) {
-            if (!('webkitSpeechRecognition' in window)) return alert("Voice recognition requires Chrome or Edge.");
-            const recognition = new webkitSpeechRecognition();
-            recognition.lang = activeAccent;
-            
-            const btn = document.getElementById('micBtn');
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing Audio...';
-            btn.classList.add('opacity-50');
-            
-            recognition.onresult = (e) => {
-                const result = e.results[0][0].transcript.toLowerCase();
-                btn.innerHTML = '<i class="fas fa-microphone"></i> Tap to speak';
-                btn.classList.remove('opacity-50');
-
-                if(result.includes(target.toLowerCase())) {
-                    handleFeedback(true);
-                    document.getElementById('feedbackTitle').innerText = "Clear Pronunciation";
-                } else {
-                    handleFeedback(false);
-                    document.getElementById('feedbackSub').innerText = `Transcript: "${result}"`;
-                }
-            };
-
-            recognition.onerror = () => {
-                btn.innerHTML = '<i class="fas fa-microphone"></i> Tap to speak';
-                btn.classList.remove('opacity-50');
-            };
-
-            recognition.start();
-        }
-
-        function confirmExit() {
-            if(confirm("Exit this session? Current progress will not be recorded.")) {
-                resetToHome();
+        function switchTab(tab) {
+            if (tab === 'accent') {
+                const container = document.getElementById('main-content');
+                container.innerHTML = `
+                    <div class="content-card text-center py-10">
+                        <h2 class="text-2xl font-bold mb-4">Accent Lab</h2>
+                        <p class="text-slate-500 mb-6">Switch between dialects to practice your listening and pronunciation.</p>
+                        <div class="grid grid-cols-3 gap-4">
+                            <button class="p-6 rounded-2xl border-2 border-indigo-600 bg-indigo-50 font-bold text-indigo-700">🇺🇸 US English</button>
+                            <button class="p-6 rounded-2xl border-2 border-slate-100 font-bold text-slate-400">🇬🇧 UK British</button>
+                            <button class="p-6 rounded-2xl border-2 border-slate-100 font-bold text-slate-400">🇦🇺 AU Aussie</button>
+                        </div>
+                    </div>
+                `;
             }
         }
 
-        window.onload = () => {
-            window.speechSynthesis.onvoiceschanged = populateVoices;
-            populateVoices();
-        };
-
+        window.onload = () => renderView('theory');
     </script>
 </body>
 </html>
