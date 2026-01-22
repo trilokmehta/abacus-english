@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Profile - Brainiac Admin</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="sidebar.js"></script>
+
+    <style>
+      .page-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #666;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .back-link:hover {
+        color: var(--brand-orange);
+      }
+
+      /* GRID LAYOUT FOR PAGE */
+      .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Profile (Left) | History (Right) */
+        gap: 25px;
+      }
+
+      /* CARD STYLES */
+      .card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      }
+
+      .card h3 {
+        margin-top: 0;
+        color: #333;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+      }
+
+      /* FORM STYLES */
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* Two columns inside the form */
+        gap: 15px;
+      }
+
+      .form-group {
+        margin-bottom: 5px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #555;
+      }
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: 0.2s;
+      }
+      .form-group input:focus {
+        border-color: var(--brand-orange);
+        outline: none;
+      }
+
+      .btn-save {
+        width: 100%;
+        background: var(--brand-orange);
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+        margin-top: 20px;
+      }
+      .btn-save:hover {
+        background: var(--brand-dark);
+      }
+
+      /* HISTORY TABLE */
+      .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+      }
+
+      .history-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .history-table th {
+        text-align: left;
+        color: #777;
+        font-size: 0.85rem;
+        padding: 10px;
+        background: #f9f9f9;
+      }
+      .history-table td {
+        padding: 15px 10px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .mode-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        background: #e3f2fd;
+        color: #1976d2;
+      }
+      .mode-badge.Cash {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+
+      .btn-receipt {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .btn-receipt:hover {
+        background: black;
+      }
+
+      /* Responsive */
+      @media (max-width: 1000px) {
+        .profile-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-container">
+      <a href="admin-students.html" class="back-link">← Back to Student List</a>
+
+      <div class="profile-grid">
+        <div class="card">
+          <h3>Edit Profile</h3>
+          <form id="profile-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Student Name</label>
+                <input type="text" id="p-name" required />
+              </div>
+              <div class="form-group">
+                <label>Father's Name</label>
+                <input type="text" id="p-father" />
+              </div>
+
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="p-phone" required />
+              </div>
+              <div class="form-group">
+                <label>School Name</label>
+                <input type="text" id="p-school" />
+              </div>
+
+              <div class="form-group">
+                <label>Current Edu</label>
+                <input type="text" id="p-edu" placeholder="Class 10..." />
+              </div>
+              <div class="form-group">
+                <label>Sibling Name</label>
+                <input type="text" id="p-sibling" />
+              </div>
+
+              <div class="form-group" style="grid-column: span 2">
+                <label>Parent Education / Occupation</label>
+                <input type="text" id="p-parent-edu" />
+              </div>
+
+              <div class="form-group">
+                <label>Fee Amount (₹)</label>
+                <input type="number" id="p-fee" required />
+              </div>
+              <div class="form-group">
+                <label>Billing Day</label>
+                <input type="number" id="p-day" required />
+              </div>
+
+              <div class="form-group">
+                <label>Branch</label>
+                <select
+                  id="p-branch"
+                  disabled
+                  style="background: #f5f5f5; cursor: not-allowed"
+                ></select>
+              </div>
+              <div class="form-group">
+                <label>Status</label>
+                <select id="p-status">
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn-save">Save Changes</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="history-header">
+            <h3 style="border: none; margin: 0; padding: 0">Payment History</h3>
+            <div style="text-align: right">
+              <span style="font-size: 0.9rem; color: #666"
+                >Total Paid Lifetime</span
+              ><br />
+              <strong
+                style="font-size: 1.2rem; color: #28a745"
+                id="lifetime-total"
+                >₹0</strong
+              >
+            </div>
+          </div>
+
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Month</th>
+                <th>Mode</th>
+                <th>Receipt</th>
+              </tr>
+            </thead>
+            <tbody id="payment-list">
+              <tr>
+                <td colspan="5">Loading history...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- CONFIG ---
+      const SUPABASE_URL = "https://moktlyeoljidtjbokqne.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1va3RseWVvbGppZHRqYm9rcW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTIwODQsImV4cCI6MjA4NDU4ODA4NH0.ZnDXCZi58_srExZVLjMTsZVdrF-MyOpDDv27vVx_K5k";
+
+      // Using 'profileClient' to avoid variable conflicts
+      const profileClient = supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+      );
+      const { jsPDF } = window.jspdf;
+
+      // Get Student ID
+      const urlParams = new URLSearchParams(window.location.search);
+      const STUDENT_ID = urlParams.get("id");
+
+      if (!STUDENT_ID) {
+        alert("No student selected.");
+        window.location.href = "admin-students.html";
+      }
+
+      // --- INIT ---
+      window.addEventListener("load", () => {
+        loadProfile();
+        loadHistory();
+      });
+
+      // --- 1. LOAD PROFILE ---
+      async function loadProfile() {
+        // Load branches for dropdown
+        const { data: branches } = await profileClient
+          .from("branches")
+          .select("*");
+        const branchSelect = document.getElementById("p-branch");
+        branches.forEach((b) => {
+          branchSelect.innerHTML += `<option value="${b.id}">${b.name}</option>`;
+        });
+
+        // Load Student Data
+        const { data: student, error } = await profileClient
+          .from("students")
+          .select("*")
+          .eq("id", STUDENT_ID)
+          .single();
+
+        if (error) {
+          alert("Error loading profile");
+          return;
+        }
+
+        // Populate Fields
+        document.getElementById("p-name").value = student.name || "";
+        document.getElementById("p-phone").value = student.phone || "";
+        document.getElementById("p-fee").value = student.fee_amount || 0;
+        document.getElementById("p-day").value = student.billing_day || 1;
+        document.getElementById("p-branch").value = student.branch_id;
+        document.getElementById("p-status").value =
+          student.is_active.toString();
+
+        // New Fields
+        document.getElementById("p-father").value = student.father_name || "";
+        document.getElementById("p-school").value = student.school_name || "";
+        document.getElementById("p-sibling").value = student.sibling_name || "";
+        document.getElementById("p-edu").value =
+          student.current_education || "";
+        document.getElementById("p-parent-edu").value =
+          student.parent_education || "";
+      }
+
+      // --- 2. UPDATE PROFILE ---
+      document
+        .getElementById("profile-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.querySelector(".btn-save");
+          btn.textContent = "Saving...";
+
+          const updates = {
+            name: document.getElementById("p-name").value,
+            phone: document.getElementById("p-phone").value,
+            fee_amount: parseInt(document.getElementById("p-fee").value),
+            billing_day: parseInt(document.getElementById("p-day").value),
+            is_active: document.getElementById("p-status").value === "true",
+            // New Fields
+            father_name: document.getElementById("p-father").value,
+            school_name: document.getElementById("p-school").value,
+            sibling_name: document.getElementById("p-sibling").value,
+            current_education: document.getElementById("p-edu").value,
+            parent_education: document.getElementById("p-parent-edu").value,
+          };
+
+          const { error } = await profileClient
+            .from("students")
+            .update(updates)
+            .eq("id", STUDENT_ID);
+
+          if (error) alert("Update failed: " + error.message);
+          else alert("Profile updated successfully!");
+
+          btn.textContent = "Save Changes";
+        });
+
+      // --- 3. LOAD HISTORY ---
+      async function loadHistory() {
+        const list = document.getElementById("payment-list");
+
+        const { data: payments, error } = await profileClient
+          .from("payments")
+          .select("*")
+          .eq("student_id", STUDENT_ID)
+          .order("payment_date", { ascending: false });
+
+        if (error) return;
+
+        list.innerHTML = "";
+        let totalLifetime = 0;
+
+        if (payments.length === 0) {
+          list.innerHTML =
+            '<tr><td colspan="5" style="text-align:center; color:#999;">No payments recorded yet.</td></tr>';
+          return;
+        }
+
+        payments.forEach((p) => {
+          totalLifetime += p.amount_paid;
+          const datePaid = new Date(p.payment_date).toLocaleDateString("en-IN");
+          const forMonth = new Date(p.payment_for_month).toLocaleDateString(
+            "en-IN",
+            { month: "short", year: "numeric" },
+          );
+          const mode = p.payment_mode || "Cash";
+
+          const row = `
+                    <tr>
+                        <td>${datePaid}</td>
+                        <td style="font-weight:bold;">₹${p.amount_paid}</td>
+                        <td>${forMonth}</td>
+                        <td><span class="mode-badge ${mode}">${mode}</span></td>
+                        <td>
+                            <button class="btn-receipt" onclick="generateReceipt('${p.id}', '${datePaid}', '${p.amount_paid}', '${forMonth}')">
+                                📄 PDF
+                            </button>
+                        </td>
+                    </tr>
+                `;
+          list.innerHTML += row;
+        });
+
+        document.getElementById("lifetime-total").textContent =
+          `₹${totalLifetime.toLocaleString()}`;
+      }
+
+      // --- 4. RECEIPT GENERATOR ---
+      function generateReceipt(id, date, amount, month) {
+        const doc = new jsPDF();
+        const name = document.getElementById("p-name").value;
+        const branchName =
+          document.getElementById("p-branch").options[
+            document.getElementById("p-branch").selectedIndex
+          ].text;
+
+        // Header
+        doc.setFillColor(255, 107, 0); // Orange
+        doc.rect(0, 0, 210, 40, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.setFont("helvetica", "bold");
+        doc.text("BRAINIAC GYM", 105, 20, null, null, "center");
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text("Fee Payment Receipt", 105, 30, null, null, "center");
+
+        // Details
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(12);
+
+        let y = 60;
+        const line = 10;
+
+        doc.setFont("helvetica", "bold");
+        doc.text("Receipt ID:", 20, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(id.split("-")[0].toUpperCase(), 60, y);
+
+        y += line;
+        doc.setFont("helvetica", "bold");
+        doc.text("Date Paid:", 20, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(date, 60, y);
+
+        y += line;
+        doc.setFont("helvetica", "bold");
+        doc.text("Student Name:", 20, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(name, 60, y);
+
+        y += line;
+        doc.setFont("helvetica", "bold");
+        doc.text("Branch:", 20, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(branchName, 60, y);
+
+        // Amount Box
+        y += 20;
+        doc.setDrawColor(200);
+        doc.setFillColor(245, 245, 245);
+        doc.rect(20, y, 170, 30, "FD");
+
+        doc.setFontSize(14);
+        doc.text("Amount Paid:", 30, y + 12);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(16);
+        doc.text(`INR ${amount}/-`, 30, y + 22);
+
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text(`(For Month: ${month})`, 120, y + 18);
+
+        // Footer
+        y += 50;
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(
+          "This is a computer generated receipt.",
+          105,
+          y,
+          null,
+          null,
+          "center",
+        );
+        doc.text(
+          "Thank you for your payment!",
+          105,
+          y + 5,
+          null,
+          null,
+          "center",
+        );
+
+        doc.save(`Receipt_${name}_${month}.pdf`);
+      }
+    </script>
+  </body>
+</html>

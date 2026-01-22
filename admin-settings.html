@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings - Brainiac Admin</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="sidebar.js"></script>
+
+    <style>
+      .page-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .settings-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+      }
+
+      .card {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+      }
+
+      h3 {
+        margin-top: 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eee;
+        color: #333;
+      }
+
+      /* INPUTS */
+      .setting-input-group {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+      .setting-input-group input,
+      .setting-input-group select {
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+      }
+
+      /* BUTTONS */
+      .btn-action {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        background: var(--brand-orange);
+        color: white;
+        font-weight: bold;
+      }
+      .btn-action:hover {
+        background: var(--brand-dark);
+      }
+
+      .btn-reset {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        margin-left: 10px;
+      }
+
+      /* LISTS */
+      .item-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+      }
+      .item-name {
+        font-weight: 600;
+        color: #444;
+      }
+
+      /* Mobile */
+      @media (max-width: 900px) {
+        .settings-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-container">
+      <h2 style="margin-top: 0">System Settings</h2>
+
+      <div class="settings-grid">
+        <div class="card">
+          <h3>Branch Management</h3>
+          <div class="setting-input-group">
+            <input
+              type="text"
+              id="new-branch-name"
+              placeholder="Enter Branch Name"
+            />
+            <button class="btn-action" onclick="addBranch()">+ Add</button>
+          </div>
+          <ul class="item-list" id="branch-list"></ul>
+        </div>
+
+        <div class="card">
+          <h3>Create New Teacher</h3>
+          <p style="font-size: 0.9rem; color: #666">
+            Create login credentials directly.
+          </p>
+
+          <div class="setting-input-group" style="flex-direction: column">
+            <input
+              type="text"
+              id="t-name"
+              placeholder="Full Name (e.g. Sarah Jones)"
+            />
+            <input type="email" id="t-email" placeholder="Email (Login ID)" />
+            <input type="text" id="t-pass" placeholder="Password" />
+            <button
+              class="btn-action"
+              style="width: 100%"
+              onclick="createTeacher()"
+            >
+              Create Account
+            </button>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: span 2">
+          <h3>Teacher Access & Management</h3>
+          <div class="setting-input-group">
+            <select id="teacher-select">
+              <option value="">Select Teacher...</option>
+            </select>
+            <select id="branch-select">
+              <option value="">Select Branch...</option>
+            </select>
+            <button class="btn-action" onclick="assignTeacher()">
+              Assign Access
+            </button>
+          </div>
+
+          <h4 style="margin-bottom: 10px">Current Active Teachers</h4>
+          <ul class="item-list" id="teacher-list-display"></ul>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- CONFIG ---
+      const SUPABASE_URL = "https://moktlyeoljidtjbokqne.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1va3RseWVvbGppZHRqYm9rcW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTIwODQsImV4cCI6MjA4NDU4ODA4NH0.ZnDXCZi58_srExZVLjMTsZVdrF-MyOpDDv27vVx_K5k";
+
+      // FIXED: Renamed variable to avoid conflict with sidebar.js
+      const settingsClient = supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+      );
+
+      // --- INIT ---
+      window.addEventListener("load", () => {
+        loadBranches();
+        loadTeachers();
+      });
+
+      // --- 1. BRANCHES ---
+      async function loadBranches() {
+        const list = document.getElementById("branch-list");
+        const dropdown = document.getElementById("branch-select");
+
+        const { data: branches, error } = await settingsClient
+          .from("branches")
+          .select("*")
+          .order("id");
+        if (error) return alert("Error: " + error.message);
+
+        list.innerHTML = "";
+        dropdown.innerHTML = '<option value="">Select Branch...</option>';
+
+        branches.forEach((b) => {
+          list.innerHTML += `<li class="list-item"><span class="item-name">${b.name}</span></li>`;
+          dropdown.innerHTML += `<option value="${b.id}">${b.name}</option>`;
+        });
+      }
+
+      async function addBranch() {
+        const name = document.getElementById("new-branch-name").value.trim();
+        if (!name) return;
+        const { error } = await settingsClient
+          .from("branches")
+          .insert({ name });
+        if (error) alert(error.message);
+        else {
+          document.getElementById("new-branch-name").value = "";
+          loadBranches();
+        }
+      }
+
+      // --- 2. TEACHERS ---
+      async function loadTeachers() {
+        const select = document.getElementById("teacher-select");
+        const list = document.getElementById("teacher-list-display");
+
+        const { data: teachers } = await settingsClient
+          .from("profiles")
+          .select("*")
+          .eq("role", "teacher");
+
+        select.innerHTML = '<option value="">Select Teacher...</option>';
+        list.innerHTML = "";
+
+        teachers.forEach((t) => {
+          // Populate Dropdown
+          select.innerHTML += `<option value="${t.id}">${t.full_name}</option>`;
+
+          // Populate List with Reset Button
+          list.innerHTML += `
+                    <li class="list-item">
+                        <div>
+                            <span class="item-name">${t.full_name}</span><br>
+                            <small>${t.id}</small>
+                        </div>
+                        <button class="btn-reset" onclick="resetPassword('${t.id}', '${t.full_name}')">Reset Pass</button>
+                    </li>
+                `;
+        });
+      }
+
+      // --- 3. EDGE FUNCTION CALLS ---
+
+      async function createTeacher() {
+        const name = document.getElementById("t-name").value;
+        const email = document.getElementById("t-email").value;
+        const pass = document.getElementById("t-pass").value;
+
+        if (!name || !email || !pass) return alert("Fill all fields");
+
+        const btn = document.querySelector(".btn-action"); // quick selector
+        btn.textContent = "Creating...";
+
+        // Call Edge Function
+        const { data, error } = await settingsClient.functions.invoke(
+          "user-management",
+          {
+            body: {
+              action: "create",
+              email: email,
+              password: pass,
+              fullName: name,
+            },
+          },
+        );
+
+        if (error) alert("Function Error: " + error.message);
+        else if (data.error) alert("Error: " + data.error);
+        else {
+          alert("Teacher Created Successfully!");
+          loadTeachers(); // Refresh list
+        }
+        btn.textContent = "Create Account";
+      }
+
+      async function resetPassword(userId, userName) {
+        const newPass = prompt(`Enter NEW password for ${userName}:`);
+        if (!newPass) return;
+
+        const { data, error } = await settingsClient.functions.invoke(
+          "user-management",
+          {
+            body: { action: "reset", userId: userId, password: newPass },
+          },
+        );
+
+        if (error) alert("Error: " + error.message);
+        else alert("Password has been reset.");
+      }
+
+      // --- 4. ASSIGNMENT ---
+      async function assignTeacher() {
+        const tId = document.getElementById("teacher-select").value;
+        const bId = document.getElementById("branch-select").value;
+        if (!tId || !bId) return alert("Select both options");
+
+        const { error } = await settingsClient
+          .from("teacher_branches")
+          .insert({ teacher_id: tId, branch_id: bId });
+        if (error) alert(error.message);
+        else alert("Access Granted!");
+      }
+    </script>
+  </body>
+</html>

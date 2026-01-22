@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Operations - Brainiac Admin</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="sidebar.js"></script>
+
+    <style>
+      .page-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      /* GRID LAYOUT */
+      .ops-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr; /* Defaulters (Wide) | Collect (Narrow) */
+        gap: 25px;
+      }
+
+      /* --- CARDS --- */
+      .card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        height: 100%;
+      }
+
+      h3 {
+        margin-top: 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* --- DEFAULTER LIST --- */
+      .defaulter-list {
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 5px;
+      }
+
+      .defaulter-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        transition: 0.2s;
+      }
+      .defaulter-item:hover {
+        background: #fffcf8;
+      }
+
+      .d-info h4 {
+        margin: 0 0 4px 0;
+        font-size: 1rem;
+        color: #333;
+      }
+      .d-info p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #777;
+      }
+      .d-badge {
+        background: #ffebee;
+        color: #c62828;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+      }
+
+      .wa-btn {
+        background: #25d366;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 600;
+      }
+      .wa-btn:hover {
+        background: #1ebc57;
+      }
+
+      .copy-all-btn {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+      }
+
+      /* --- QUICK COLLECT FORM --- */
+      .collect-form label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #555;
+      }
+      .collect-form input,
+      .collect-form select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 1rem;
+      }
+
+      .btn-pay {
+        width: 100%;
+        background: var(--brand-orange);
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      .btn-pay:hover {
+        background: var(--brand-dark);
+      }
+
+      /* Mobile Responsive */
+      @media (max-width: 900px) {
+        .ops-grid {
+          grid-template-columns: 1fr;
+        }
+        .card {
+          margin-bottom: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-container">
+      <h2 style="margin-top: 0">Daily Operations</h2>
+
+      <div class="ops-grid">
+        <div class="card">
+          <h3>
+            <span> Defaulters (This Month)</span>
+            <button class="copy-all-btn" onclick="copyAllNumbers()">
+              Copy All Numbers
+            </button>
+          </h3>
+
+          <div class="defaulter-list" id="defaulter-container">
+            <p style="text-align: center; padding: 20px">Scanning records...</p>
+          </div>
+        </div>
+
+        <div class="card" style="height: auto; align-self: start">
+          <h3>Quick Collect</h3>
+          <form class="collect-form" id="collect-form">
+            <label>Search Student</label>
+            <input
+              type="text"
+              id="student-search"
+              placeholder="Type Name..."
+              onkeyup="filterStudentDropdown()"
+            />
+
+            <label>Select Student</label>
+            <select
+              id="student-select"
+              required
+              size="5"
+              style="height: 120px"
+            ></select>
+
+            <label>Amount (₹)</label>
+            <input
+              type="number"
+              id="pay-amount"
+              placeholder="e.g. 5000"
+              required
+            />
+
+            <label>Payment Mode</label>
+            <select id="pay-mode">
+              <option value="Cash">Cash</option>
+              <option value="UPI">UPI / GPay</option>
+              <option value="Bank">Bank Transfer</option>
+            </select>
+
+            <button type="submit" class="btn-pay">Mark as Paid</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- CONFIG ---
+      const SUPABASE_URL = "https://moktlyeoljidtjbokqne.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1va3RseWVvbGppZHRqYm9rcW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTIwODQsImV4cCI6MjA4NDU4ODA4NH0.ZnDXCZi58_srExZVLjMTsZVdrF-MyOpDDv27vVx_K5k";
+
+      // FIXED: Renamed 'supabase' to 'opsClient' to avoid conflict with the library
+      const opsClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      let allStudentsCache = [];
+      let currentDefaulters = [];
+
+      // --- INIT ---
+      window.addEventListener("load", () => {
+        loadOperationsData();
+      });
+
+      async function loadOperationsData() {
+        // 1. Get Dates for Current Month
+        const today = new Date();
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+          .toISOString()
+          .split("T")[0];
+        const endOfMonth = new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          0,
+        )
+          .toISOString()
+          .split("T")[0];
+
+        // 2. Fetch Active Students + Branches using opsClient
+        const { data: students, error: stError } = await opsClient
+          .from("students")
+          .select("id, name, phone, fee_amount, branch_id, branches(name)")
+          .eq("is_active", true)
+          .order("name");
+
+        if (stError) return alert("Error loading students: " + stError.message);
+
+        allStudentsCache = students; // For the Quick Collect dropdown
+        populateStudentDropdown(students);
+
+        // 3. Fetch Payments for THIS Month using opsClient
+        const { data: payments, error: payError } = await opsClient
+          .from("payments")
+          .select("student_id")
+          .gte("payment_for_month", startOfMonth)
+          .lte("payment_for_month", endOfMonth);
+
+        if (payError)
+          return alert("Error loading payments: " + payError.message);
+
+        // 4. Calculate Defaulters
+        const paidIds = new Set(payments.map((p) => p.student_id));
+        currentDefaulters = students.filter((s) => !paidIds.has(s.id));
+
+        renderDefaulters();
+      }
+
+      // --- DEFAULTER LOGIC ---
+      function renderDefaulters() {
+        const container = document.getElementById("defaulter-container");
+        container.innerHTML = "";
+
+        if (currentDefaulters.length === 0) {
+          container.innerHTML = `
+                    <div style="text-align:center; padding:40px; color:#28a745;">
+                        <span style="font-size:3rem;">No One left</span><br>
+                        <h3>All Clear!</h3>
+                        <p>No pending payments for this month.</p>
+                    </div>`;
+          return;
+        }
+
+        currentDefaulters.forEach((s) => {
+          // Generate WhatsApp Link
+          const msg = `Hello ${s.name}, gentle reminder that your fees of Rs.${s.fee_amount} is due for this month at Brainiac Gym. Please pay at your earliest convenience.`;
+          const waLink = `https://wa.me/91${s.phone}?text=${encodeURIComponent(msg)}`;
+
+          const item = `
+                    <div class="defaulter-item">
+                        <div class="d-info">
+                            <h4>${s.name} <span class="d-badge">Due: ₹${s.fee_amount}</span></h4>
+                            <p>${s.branches?.name} |  ${s.phone}</p>
+                        </div>
+                        <a href="${waLink}" target="_blank" class="wa-btn" title="Send Reminder">
+                            <span> Send</span>
+                        </a>
+                    </div>
+                `;
+          container.innerHTML += item;
+        });
+      }
+
+      function copyAllNumbers() {
+        if (currentDefaulters.length === 0) return alert("No numbers to copy.");
+
+        const numbers = currentDefaulters.map((s) => s.phone).join(",");
+
+        navigator.clipboard
+          .writeText(numbers)
+          .then(() => {
+            alert(
+              `Copied ${currentDefaulters.length} phone numbers to clipboard!`,
+            );
+          })
+          .catch((err) => {
+            alert("Failed to copy");
+          });
+      }
+
+      // --- QUICK COLLECT LOGIC ---
+
+      // 1. Filter Dropdown
+      function filterStudentDropdown() {
+        const term = document
+          .getElementById("student-search")
+          .value.toLowerCase();
+        const filtered = allStudentsCache.filter((s) =>
+          s.name.toLowerCase().includes(term),
+        );
+        populateStudentDropdown(filtered);
+      }
+
+      function populateStudentDropdown(list) {
+        const select = document.getElementById("student-select");
+        select.innerHTML = "";
+        list.forEach((s) => {
+          const opt = document.createElement("option");
+          opt.value = s.id;
+          opt.dataset.fee = s.fee_amount; // Store fee in data attribute
+          opt.textContent = `${s.name} (${s.branches?.name})`;
+          select.appendChild(opt);
+        });
+      }
+
+      // 2. Auto-fill Amount on Selection
+      document
+        .getElementById("student-select")
+        .addEventListener("change", function () {
+          const selectedOpt = this.options[this.selectedIndex];
+          if (selectedOpt) {
+            document.getElementById("pay-amount").value =
+              selectedOpt.dataset.fee;
+          }
+        });
+
+      // 3. Submit Payment
+      document
+        .getElementById("collect-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.querySelector(".btn-pay");
+          const originalText = btn.textContent;
+          btn.textContent = "Processing...";
+          btn.disabled = true;
+
+          const studentId = document.getElementById("student-select").value;
+          const amount = document.getElementById("pay-amount").value;
+          const mode = document.getElementById("pay-mode").value;
+
+          if (!studentId) {
+            alert("Please select a student.");
+            btn.textContent = originalText;
+            btn.disabled = false;
+            return;
+          }
+
+          // Insert Payment using opsClient
+          const { error } = await opsClient.from("payments").insert({
+            student_id: studentId,
+            amount_paid: parseInt(amount),
+            payment_mode: mode,
+            payment_for_month: new Date().toISOString(), // Counts for THIS month
+          });
+
+          if (error) {
+            alert("Error: " + error.message);
+          } else {
+            alert("Payment Recorded Successfully! ");
+            // Reset Form
+            document.getElementById("student-search").value = "";
+            document.getElementById("pay-amount").value = "";
+            // Reload Data (Remove from Defaulter list)
+            loadOperationsData();
+          }
+
+          btn.textContent = originalText;
+          btn.disabled = false;
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+Folder: academy-fee-system/
+
+index.html (Login Page)
+
+Simple email/password form.
+
+Redirects to admin.html or teacher.html based on role.
+
+teacher-dashboard.html
+
+Add Student Modal: Form to input Name, Phone, Fee, Date (Write Only).
+
+Student List: Shows only Name & Paid/Pending Status (Read Only).
+
+Action: "Mark Paid" button (Inserts row into payments table).
+
+admin-dashboard.html
+
+Full access. See total revenue, phone numbers, edit fees.
+
+Branch management controls.
+
+style.css
+
+Mobile-first CSS (Large buttons, readable fonts for phone screens).
+
+supabase-client.js
+
+Contains your createClient initialization and standard DB functions (e.g., addStudent, markPaid).
+
+app.js
+
+Handles the logic: checking if user is logged in, fetching data from the View, and handling the "Add Student" form submission.

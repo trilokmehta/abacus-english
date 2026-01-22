@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Money Report - Brainiac Admin</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="sidebar.js"></script>
+
+    <style>
+      /* Page Specific Styles */
+      .dashboard-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      /* CONTROLS */
+      .controls-bar {
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .date-picker {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+      }
+
+      .panic-btn {
+        background: #25d366;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.2s;
+      }
+      .panic-btn:hover {
+        background: #1ebc57;
+      }
+
+      /* STATS CARDS */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-left: 5px solid #ccc;
+      }
+
+      .stat-card.blue {
+        border-left-color: #ff6b00;
+      }
+      .stat-card.green {
+        border-left-color: #28a745;
+      }
+      .stat-card.red {
+        border-left-color: #dc3545;
+      }
+
+      .stat-title {
+        font-size: 0.9rem;
+        color: #666;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #333;
+      }
+      .stat-sub {
+        font-size: 0.85rem;
+        color: #888;
+        margin-top: 5px;
+      }
+
+      /* CHARTS */
+      .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+      }
+
+      .chart-box {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        height: 400px;
+      }
+
+      .leaderboard-box {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      }
+
+      .leaderboard-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+      }
+      .lb-name {
+        font-weight: 600;
+      }
+      .lb-val {
+        color: #28a745;
+        font-weight: bold;
+      }
+
+      @media (max-width: 768px) {
+        .content-grid {
+          grid-template-columns: 1fr;
+        }
+        .controls-bar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .panic-btn {
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <div class="controls-bar">
+        <div>
+          <h2 style="margin: 0; color: #333">Financial Overview</h2>
+          <p style="margin: 0; color: #777; font-size: 0.9rem">
+            Real-time revenue tracking
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center">
+          <input
+            type="month"
+            id="month-selector"
+            class="date-picker"
+            onchange="loadDashboardData()"
+          />
+          <button class="panic-btn" onclick="whatsappDefaulters()">
+            📢 WhatsApp Defaulters
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-title">Expected Revenue</div>
+          <div class="stat-value" id="val-expected">₹0</div>
+          <div class="stat-sub" id="sub-active">0 Active Students</div>
+        </div>
+
+        <div class="stat-card green">
+          <div class="stat-title">Collected</div>
+          <div class="stat-value" id="val-collected" style="color: #28a745">
+            ₹0
+          </div>
+          <div class="stat-sub">
+            <span id="txt-cash">Cash: ₹0</span> |
+            <span id="txt-online">Online: ₹0</span>
+          </div>
+        </div>
+
+        <div class="stat-card red">
+          <div class="stat-title">Pending</div>
+          <div class="stat-value" id="val-pending" style="color: #dc3545">
+            ₹0
+          </div>
+          <div class="stat-sub" id="sub-defaulters">0 Students Pending</div>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="chart-box">
+          <h3 style="margin-top: 0">Revenue by Branch</h3>
+          <canvas id="revenueChart"></canvas>
+        </div>
+
+        <div class="leaderboard-box">
+          <h3 style="margin-top: 0">Branch Performance</h3>
+          <div id="leaderboard-list">
+            <p style="color: #999">Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // CONFIG
+      const SUPABASE_URL = "https://moktlyeoljidtjbokqne.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1va3RseWVvbGppZHRqYm9rcW5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMTIwODQsImV4cCI6MjA4NDU4ODA4NH0.ZnDXCZi58_srExZVLjMTsZVdrF-MyOpDDv27vVx_K5k";
+
+      // Renamed to 'dashClient' to avoid conflict
+      const dashClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      let revenueChartInstance = null;
+
+      // INIT
+      window.addEventListener("load", () => {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        document.getElementById("month-selector").value = `${yyyy}-${mm}`;
+
+        checkAuthAndLoad();
+      });
+
+      async function checkAuthAndLoad() {
+        const {
+          data: { session },
+        } = await dashClient.auth.getSession();
+        if (!session) window.location.href = "index.html";
+        loadDashboardData();
+      }
+
+      async function loadDashboardData() {
+        const selectedMonthVal =
+          document.getElementById("month-selector").value;
+        const [year, month] = selectedMonthVal.split("-");
+
+        // Calculate Start and End Date
+        // Start: First day of selected month
+        const startDate = `${year}-${month}-01`;
+        // End: Last day of selected month
+        // We use new Date(year, month, 0) which gets the last day of previous month index (so we pass month as is because month index is 0-based in JS but 1-based in our string)
+        // Actually, simpler:
+        const lastDay = new Date(year, month, 0).getDate();
+        const endDate = `${year}-${month}-${lastDay}`;
+
+        console.log(`Report Range: ${startDate} to ${endDate}`);
+
+        // 1. FETCH STUDENTS
+        const { data: students, error: stError } = await dashClient
+          .from("students")
+          .select("id, branch_id, fee_amount, phone")
+          .eq("is_active", true);
+
+        if (stError) return alert("Error loading students: " + stError.message);
+
+        // 2. FETCH PAYMENTS
+        // We removed 'branch_id_cache' from select just in case it's missing in DB to prevent 400 error
+        // We will infer branch from the student table instead.
+        const { data: payments, error: payError } = await dashClient
+          .from("payments")
+          .select("amount_paid, student_id, payment_mode")
+          .gte("payment_for_month", startDate)
+          .lte("payment_for_month", endDate);
+
+        if (payError) {
+          console.error(payError);
+          return alert("Error loading payments. Check console.");
+        }
+
+        // CALCULATIONS
+        let totalExpected = 0;
+        let totalCollected = 0;
+        let totalCash = 0;
+        let totalOnline = 0;
+
+        const branchStats = {};
+        const paidStudentIds = new Set();
+
+        // Process Payments
+        if (payments) {
+          payments.forEach((p) => {
+            totalCollected += p.amount_paid;
+            paidStudentIds.add(p.student_id);
+
+            const mode = p.payment_mode || "Cash";
+            if (mode === "UPI" || mode === "Bank") totalOnline += p.amount_paid;
+            else totalCash += p.amount_paid;
+          });
+        }
+
+        // Process Students
+        const defaultersList = [];
+
+        if (students) {
+          students.forEach((s) => {
+            totalExpected += s.fee_amount;
+
+            if (!branchStats[s.branch_id])
+              branchStats[s.branch_id] = { expected: 0, collected: 0 };
+            branchStats[s.branch_id].expected += s.fee_amount;
+
+            if (paidStudentIds.has(s.id)) {
+              // Find payment (handle multiple payments if needed, here simple sum)
+              const studentPayments = payments.filter(
+                (p) => p.student_id === s.id,
+              );
+              const paidSum = studentPayments.reduce(
+                (sum, p) => sum + p.amount_paid,
+                0,
+              );
+              branchStats[s.branch_id].collected += paidSum;
+            } else {
+              defaultersList.push(s.phone);
+            }
+          });
+        }
+
+        // UPDATE UI
+        document.getElementById("val-expected").textContent =
+          `₹${totalExpected.toLocaleString()}`;
+        document.getElementById("sub-active").textContent =
+          `${students ? students.length : 0} Active Students`;
+
+        document.getElementById("val-collected").textContent =
+          `₹${totalCollected.toLocaleString()}`;
+        document.getElementById("txt-cash").textContent =
+          `Cash: ₹${totalCash.toLocaleString()}`;
+        document.getElementById("txt-online").textContent =
+          `Online: ₹${totalOnline.toLocaleString()}`;
+
+        const pending = totalExpected - totalCollected;
+        document.getElementById("val-pending").textContent =
+          `₹${pending.toLocaleString()}`;
+        document.getElementById("sub-defaulters").textContent =
+          `${defaultersList.length} Students Pending`;
+
+        window.currentDefaulters = defaultersList;
+
+        // Load Branch Names
+        const { data: branches } = await dashClient
+          .from("branches")
+          .select("id, name");
+        if (branches) updateChartAndLeaderboard(branchStats, branches);
+      }
+
+      function updateChartAndLeaderboard(stats, branches) {
+        const labels = [];
+        const dataCollected = [];
+        const dataExpected = [];
+        const list = document.getElementById("leaderboard-list");
+        list.innerHTML = "";
+
+        branches.forEach((b) => {
+          const s = stats[b.id] || { expected: 0, collected: 0 };
+          labels.push(b.name);
+          dataCollected.push(s.collected);
+          dataExpected.push(s.expected);
+
+          const percent =
+            s.expected > 0 ? Math.round((s.collected / s.expected) * 100) : 0;
+          list.innerHTML += `
+                    <div class="leaderboard-item">
+                        <span class="lb-name">${b.name}</span>
+                        <span>
+                            <span class="lb-val">₹${s.collected.toLocaleString()}</span> 
+                            <small class="text-muted">/ ₹${s.expected.toLocaleString()} (${percent}%)</small>
+                        </span>
+                    </div>
+                `;
+        });
+
+        const ctx = document.getElementById("revenueChart").getContext("2d");
+        if (revenueChartInstance) revenueChartInstance.destroy();
+
+        revenueChartInstance = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Collected",
+                data: dataCollected,
+                backgroundColor: "#28a745",
+              },
+              {
+                label: "Expected",
+                data: dataExpected,
+                backgroundColor: "#e9ecef",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } },
+          },
+        });
+      }
+
+      function whatsappDefaulters() {
+        const defaulters = window.currentDefaulters || [];
+        if (defaulters.length === 0) return alert("No defaulters found!");
+
+        if (confirm(`Copy ${defaulters.length} numbers to clipboard?`)) {
+          navigator.clipboard
+            .writeText(defaulters.join(","))
+            .then(() => {
+              alert("Copied!");
+            })
+            .catch((err) => alert("Copy failed: " + err));
+        }
+      }
+    </script>
+  </body>
+</html>
